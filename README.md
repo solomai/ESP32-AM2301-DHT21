@@ -15,7 +15,9 @@ This component provides an interface for the AM2301-DHT21 temperature and humidi
 ## Dependencies
 
 - ESP-IDF (Espressif IoT Development Framework)
-- GPIO Driver and FreeRTOS Libraries
+  This project is compatible (tested) with ESP-IDF versions 4.4.8 and 5.2.2.
+- FreeRTOS Libraries
+  Necessary for multitasking and real-time operations within the ESP32 environment.
 
 ## License
 
