@@ -4,6 +4,21 @@
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "esp_err.h"
+#include "esp_timer.h"
+
+// This section ensures compatibility with both ESP-IDF version 4.x and 5.x.
+// In ESP-IDF 5.x, `esp_rom_delay_us` replaces the older `ets_delay_us` function.
+// The `__has_include` directive is used to check which header file is available,
+// allowing the code to select the appropriate delay function based on the ESP-IDF version.
+#if __has_include("esp_rom_sys.h")
+    #include "esp_rom_sys.h"
+    #define delay_us esp_rom_delay_us
+#elif __has_include("esp32/rom/ets_sys.h")
+    #include "esp32/rom/ets_sys.h"
+    #define delay_us ets_delay_us
+#else
+    #error "No suitable delay function found!"
+#endif
 
 // Define GPIO levels for the AM2301 sensor
 #define AM2301_GPIO_LEVEL_HIGH 1
@@ -198,9 +213,9 @@ bool am2301_acquire_data(am2301_context_t *context)
     // the microcontroller initiates communication by sending a low signal
     gpio_set_direction(context->gpio, GPIO_MODE_OUTPUT);
     gpio_set_level(context->gpio, AM2301_GPIO_LEVEL_LOW);
-    ets_delay_us(DURATION_START_SIGNAL_USEC.DEF);
+    delay_us(DURATION_START_SIGNAL_USEC.DEF);
     gpio_set_level(context->gpio, AM2301_GPIO_LEVEL_HIGH);
-    ets_delay_us(DURATION_BUSMASTER_RELEASE_USEC.DEF);
+    delay_us(DURATION_BUSMASTER_RELEASE_USEC.DEF);
     gpio_set_direction(context->gpio, GPIO_MODE_INPUT);
 
     // wait to receive 40 bits from sensor
@@ -210,7 +225,7 @@ bool am2301_acquire_data(am2301_context_t *context)
                              DURATION_START_SIGNAL_USEC.MAX + DURATION_BUSMASTER_RELEASE_USEC.MAX)
                              + 999 ) / 1000;
     if (xSemaphoreTake(context->_receiver.semaphore, pdMS_TO_TICKS(timeout_value_msec)) != pdTRUE) {
-        ESP_LOGE(TAG_AM2301_DHT21, "%s: Timeout [%d msec] occurred while receiving data from the sensor", __FUNCTION__, timeout_value_msec);
+        ESP_LOGE(TAG_AM2301_DHT21, "%s: Timeout [%lu msec] occurred while receiving data from the sensor", __FUNCTION__, timeout_value_msec);
         invalid_data(context);
         bres = false;
     }

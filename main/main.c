@@ -42,7 +42,13 @@
 void app_main(void)
 {
     // Init blink LED
-    gpio_pad_select_gpio(BLINK_GPIO);
+    gpio_config_t io_conf;
+    io_conf.intr_type = GPIO_INTR_DISABLE;
+    io_conf.mode = GPIO_MODE_OUTPUT;
+    io_conf.pin_bit_mask = (1ULL << BLINK_GPIO);
+    io_conf.pull_down_en = 0;
+    io_conf.pull_up_en = 0;
+    gpio_config(&io_conf);
     gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
 
     // Initialize the AM2301-DHT21 sensor.
