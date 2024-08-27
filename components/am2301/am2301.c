@@ -225,7 +225,7 @@ bool am2301_acquire_data(am2301_context_t *context)
                              DURATION_START_SIGNAL_USEC.MAX + DURATION_BUSMASTER_RELEASE_USEC.MAX)
                              + 999 ) / 1000;
     if (xSemaphoreTake(context->_receiver.semaphore, pdMS_TO_TICKS(timeout_value_msec)) != pdTRUE) {
-        ESP_LOGE(TAG_AM2301_DHT21, "%s: Timeout [%lu msec] occurred while receiving data from the sensor", __FUNCTION__, timeout_value_msec);
+        ESP_LOGE(TAG_AM2301_DHT21, "%s: Timeout [%u msec] occurred while receiving data from the sensor", __FUNCTION__, timeout_value_msec);
         invalid_data(context);
         bres = false;
     }
